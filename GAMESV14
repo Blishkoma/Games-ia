@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Games.IA - Final Version</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        /* --- CONFIG GLOBALE --- */
+        :root {
+            --gd-blue: #0066ff; 
+            --gd-dark: #002244;
+            --gd-green: #00ff00;
+            --gd-yellow: #ffcc00;
+            --gd-red: #ff3333;
+        }
+
+        body {
+            margin: 0; 
+            font-family: 'Russo One', sans-serif;
+            background-color: var(--gd-dark);
+            color: white;
+            overflow: hidden; 
+            touch-action: none; 
+            height: 100vh;
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
+        /* FOND ANIMÉ */
+        .gd-bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: linear-gradient(to bottom, #004488, #001122);
+        }
+        .gd-grid-perspective {
+            position: absolute; top: 0; left: 0; width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 80px 80px;
+            transform: perspective(600px) rotateX(30deg);
+            animation: gridMove 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes gridMove { 
+            0% { transform: perspective(600px) rotateX(30deg) translateY(0); } 
+            100% { transform: perspective(600px) rotateX(30deg) translateY(80px); } 
+        }
+
+        .hidden { display: none !important; }
+        .full-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        /* --- 2. MENU PRINCIPAL --- */
+        .logo-main {
+            font-size: 4em; color: var(--gd-yellow);
+            -webkit-text-stroke: 3px black; 
+            text-shadow: 0 5px 0 #000, 0 10px 10px rgba(0,0,0,0.5);
+            margin-bottom: 40px; text-align: center; letter-spacing: 2px;
+            transform: skew(-5deg);
+        }
+        
+        .menu-row { display: flex; align-items: center; gap: 20px; }
+
+        .btn-side {
+            width: 90px; height: 90px;
+            background: linear-gradient(to bottom, #0099ff, #004488);
+            border: 4px solid white; border-radius: 15px;
+            box-shadow: 0 8px 0 #002244, 0 15px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5em; cursor: pointer; transition: transform 0.1s;
+        }
+        .btn-side:active { transform: translateY(8px); box-shadow: 0 0 0 #002244; }
+
+        .btn-play-main {
+            width: 140px; height: 140px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M35,25 L80,50 L35,75 Z" fill="%23ffff00" stroke="black" stroke-width="4"/></svg>'), linear-gradient(to bottom, #00ff00, #008800);
+            background-size: 60%, 100%; background-position: center, center; background-repeat: no-repeat;
+            border: 5px solid white; border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.4), 0 12px 0 #004400;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .btn-play-main:active { transform: scale(0.95) translateY(12px); box-shadow: 0 0 5px rgba(0,255,0,0.4), 0 0 0 #004400; }
+
+        .icon-face { width: 40px; height: 40px; background: var(--gd-yellow); border: 3px solid black; position:relative; }
+        .icon-face::before { content:''; position:absolute; top:10px; left:5px; width:8px; height:8px; background:black; }
+        .icon-face::after { content:''; position:absolute; top:10px; right:5px; width:8px; height:8px; background:black; }
+
+        /* --- 3. FENÊTRES --- */
+        .window-box {
+            background: rgba(0, 20, 40, 0.95); border: 4px solid white; border-radius: 15px;
+            padding: 20px; width: 90%; max-width: 500px; text-align: center;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); position: relative;
+            max-height: 85vh; overflow-y: auto;
+        }
+        .btn-back {
+            position: absolute; top: 15px; left: 15px; 
+            background: #ff3333; color: white; border: 3px solid white;
+            padding: 5px 15px; border-radius: 8px; font-family: 'Russo One'; cursor: pointer;
+            box-shadow: 0 4px 0 #880000;
+        }
+        .btn-back:active { transform: translateY(4px); box-shadow: none; }
+
+        .shop-tabs { display: flex; gap: 5px; margin-bottom: 15px; margin-top: 30px; }
+        .shop-tab { 
+            flex: 1; padding: 10px; background: #111; color: #888; 
+            border: 2px solid #555; cursor: pointer; border-radius: 8px 8px 0 0;
+        }
+        .shop-tab.active { background: var(--gd-blue); color: white; border-color: white; border-bottom: none; }
+        
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .skin-card { 
+            background: rgba(255,255,255,0.05); border: 2px solid #555; padding: 10px; 
+            border-radius: 10px; transition: all 0.2s; 
+        }
+        .skin-card.unlocked { border-color: white; cursor: pointer; }
+        .skin-card.selected { border-color: var(--gd-green); background: rgba(0,255,0,0.1); box-shadow: 0 0 10px var(--gd-green); }
+        .skin-prev { width: 30px; height: 30px; margin: 0 auto 5px; border: 2px solid white; }
+
+        /* CAROUSEL */
+        .level-card {
+            background: #222; border: 3px solid white; border-radius: 10px; padding: 20px;
+            margin: 20px 0; height: 180px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+        }
+        .nav-arrow { font-size: 3em; color: var(--gd-yellow); -webkit-text-stroke: 1px black; cursor: pointer; }
+        .btn-launch { 
+            width: 100%; padding: 15px; background: var(--gd-green); color: black; font-size: 1.5em; 
+            font-family: 'Russo One'; border: 3px solid white; border-radius: 10px; cursor: pointer; 
+        }
+
+        /* --- 4. HUD JEU & PAUSE --- */
+        #game-hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* Bouton Pause */
+        #btn-pause {
+            position: absolute; top: 15px; left: 20px; pointer-events: auto;
+            width: 40px; height: 40px; border: 3px solid white; border-radius: 8px;
+            background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2em; cursor: pointer; z-index: 50;
+        }
+        
+        .hud-bar { 
+            display: flex; justify-content: space-between; align-items:flex-start;
+            padding: 10px 20px; height: 80px; margin-left: 50px; /* Espace pour btn pause */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        
+        .score-block { text-align: center; }
+        .score-val { font-size: 2em; -webkit-text-stroke: 1.5px black; display: block; line-height: 1; text-shadow: 2px 2px 0 black; }
+        .score-lbl { font-size: 0.7em; color: #ccc; }
+        .score-best { color: var(--gd-yellow); }
+
+        .prog-area {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 10px; width: 40%;
+        }
+        .prog-track {
+            flex-grow: 1; height: 14px; background: rgba(0,0,0,0.6); 
+            border: 2px solid white; border-radius: 10px; overflow: hidden;
+        }
+        .prog-fill { height: 100%; background: var(--gd-green); width: 0%; transition: width 0.1s; }
+        .prog-text { font-size: 1.2em; -webkit-text-stroke: 1px black; width: 50px; }
+
+        /* Contrôles */
+        #dpad-overlay {
+            position: absolute; bottom: 20px; right: 20px; width: 160px; height: 160px; pointer-events: auto; opacity: 0.5;
+        }
+        .dpad-row { display: flex; justify-content: center; }
+        .dpad-btn {
+            width: 50px; height: 50px; background: rgba(255,255,255,0.2); border: 2px solid white; margin: 2px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5em; border-radius: 8px; cursor: pointer;
+        }
+        .dpad-btn:active { background: white; color: black; }
+
+        #fire-btn-overlay {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); pointer-events: auto;
+        }
+        .fire-circle {
+            width: 100px; height: 100px; background: red; border: 5px solid white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5em; box-shadow: 0 0 15px red;
+            cursor: pointer;
+        }
+        .fire-circle:active { transform: scale(0.95); background: #cc0000; }
+
+        /* Menus En Jeu (Pause & Game Over) */
+        .game-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #222; border: 5px solid white; border-radius: 20px;
+            padding: 30px; text-align: center; z-index: 200; box-shadow: 0 0 50px black; width: 300px;
+        }
+        .btn-modal {
+            display: block; padding: 12px; margin: 8px 0; border-radius: 10px; border: 3px solid white;
+            cursor: pointer; font-family: 'Russo One'; color: white; width: 100%; font-size: 1.1em;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="gd-bg-layer"><div class="gd-grid-perspective"></div></div>
+
+    <section id="screen-home" class="full-screen">
+        <div class="logo-main">GAMES.IA</div>
+        <div class="menu-row">
+            <div class="btn-side" onclick="openShop()">
+                <div class="icon-face"></div>
+            </div>
+            <div class="btn-play-main" onclick="openLevelSelect()"></div>
+            <div class="btn-side" style="background: linear-gradient(to bottom, #ffaa00, #aa5500);" onclick="openStats()">
+                <div style="font-size:1em;">🏆</div>
+            </div>
+        </div>
+        <p style="margin-top:30px; opacity:0.6;">V14 - Final Edition</p>
+    </section>
+
+    <section id="screen-stats" class="full-screen hidden">
+        <div class="window-box">
+            <button class="btn-back" onclick="goHome()">RETOUR</button>
+            <h2 style="color:var(--gd-yellow)">STATS</h2>
+            <div id="stats-display" style="text-align:left; margin-top:20px; line-height:1.8em; font-size:0.9em;"></div>
+        </div>
+    </section>
+
+    <section id="screen-shop" class="full-screen hidden">
+        <div class="window-box">
+            <button class="btn-back" onclick="handleShopBack()">RETOUR</button>
+            <h2 style="margin-top:25px;">SKINS</h2>
+            <div class="shop-tabs">
+                <div class="shop-tab active" id="tab-jumper" onclick="renderShopTab('jumper')">JUMPER</div>
+                <div class="shop-tab" id="tab-sniper" onclick="renderShopTab('sniper')">SNIPER</div>
+                <div class="shop-tab" id="tab-snake" onclick="renderShopTab('snake')">SNAKE</div>
+            </div>
+            <div id="shop-content" class="shop-grid"></div>
+        </div>
+    </section>
+
+    <section id="screen-select" class="full-screen hidden">
+        <div class="window-box">
+            <button class="btn-back" onclick="goHome()">RETOUR</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:30px;">
+                <div class="nav-arrow" onclick="navGame(-1)">❮</div>
+                <div style="flex:1; padding:0 20px;">
+                    <div class="level-card" id="level-card">
+                        <div id="lvl-title" style="font-size:1.5em; margin-bottom:10px;">TITRE</div>
+                        <div id="lvl-icon" style="font-size:4em;">ICON</div>
+                        <div id="lvl-desc" style="font-size:0.8em; color:#aaa; margin-top:10px;">Desc</div>
+                    </div>
+                </div>
+                <div class="nav-arrow" onclick="navGame(1)">❯</div>
+            </div>
+            <button class="btn-launch" onclick="launchGame()">JOUER</button>
+        </div>
+    </section>
+
+    <section id="screen-game" class="full-screen hidden">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="game-hud">
+            <div id="btn-pause" onclick="togglePause()">II</div>
+
+            <div class="hud-bar">
+                <div class="score-block">
+                    <span id="hud-score" class="score-val">0</span>
+                    <span class="score-lbl">SCORE</span>
+                </div>
+                
+                <div class="prog-area">
+                    <div class="prog-track"><div class="prog-fill" id="hud-prog"></div></div>
+                    <div class="prog-text" id="hud-pct">0%</div>
+                </div>
+
+                <div class="score-block">
+                    <span id="hud-best" class="score-val score-best">0</span>
+                    <span class="score-lbl">BEST</span>
+                </div>
+            </div>
+            
+            <div id="sniper-msg" style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); font-size:3em; opacity:0; pointer-events:none;">+100</div>
+        </div>
+
+        <div id="fire-btn-overlay" class="hidden">
+            <div class="fire-circle" onpointerdown="inputFire()">TIR</div>
+        </div>
+        <div id="dpad-overlay" class="hidden">
+            <div class="dpad-row"><div class="dpad-btn" onpointerdown="inputSnake(0,-1)">▲</div></div>
+            <div class="dpad-row">
+                <div class="dpad-btn" onpointerdown="inputSnake(-1,0)">◀</div>
+                <div class="dpad-btn" onpointerdown="inputSnake(0,1)">▼</div>
+                <div class="dpad-btn" onpointerdown="inputSnake(1,0)">▶</div>
+            </div>
+        </div>
+
+        <div id="modal-pause" class="game-modal hidden">
+            <h2 style="color:var(--gd-yellow); margin-top:0;">PAUSE</h2>
+            <button class="btn-modal" style="background:var(--gd-green); color:black;" onclick="togglePause()">REPRENDRE</button>
+            <button class="btn-modal" style="background:var(--gd-blue);" onclick="openIngameShop()">CASIER</button>
+            <button class="btn-modal" style="background:#555;" onclick="quitGame()">MENU PRINCIPAL</button>
+        </div>
+
+        <div id="modal-go" class="game-modal hidden" style="border-color:var(--gd-red);">
+            <h2 style="color:var(--gd-red); margin-top:0;">FINI</h2>
+            <div style="margin:15px 0; font-size:1.2em;">Score: <span id="go-score">0</span></div>
+            <button class="btn-modal" style="background:var(--gd-green); color:black;" onclick="restartGame()">REJOUER</button>
+            <button class="btn-modal" style="background:var(--gd-blue);" onclick="openIngameShop()">CASIER</button>
+            <button class="btn-modal" style="background:var(--gd-yellow); color:black;" onclick="openLevelSelect()">AUTRES JEUX</button>
+            <button class="btn-modal" style="background:#555;" onclick="goHome()">MENU</button>
+        </div>
+    </section>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const GAMES = [
+            { id: 'jumper', title: 'STEREO JUMP', icon: '🔺', desc: 'Saute (Espace/Touch). Triangles mortels.', color: '#00ff00' },
+            { id: 'sniper', title: 'DEADSHOT', icon: '🎯', desc: 'Vise. Précision = Points.', color: '#ff0000' },
+            { id: 'snake', title: 'NEON SNAKE', icon: '🐍', desc: 'Mange. Zone sécurisée.', color: '#ba00e5' }
+        ];
+
+        // Skins facilités
+        const SKINS = {
+            jumper: [
+                {id:'def', name:'Cube', color:'#00ff00', req:0},
+                {id:'gold', name:'Gold', color:'#ffd700', req:500},
+                {id:'fire', name:'Magma', color:'#ff4400', req:1000},
+                {id:'dark', name:'Ninja', color:'#222', border:'white', req:2000},
+                {id:'chroma', name:'Rainbow', color:'chroma', req:3000}
+            ],
+            sniper: [
+                {id:'def', name:'Rouge', color:'#ff0000', req:0},
+                {id:'blue', name:'Marine', color:'#0088ff', req:200},
+                {id:'swat', name:'Tactique', color:'#555', border:'white', req:500},
+                {id:'gold', name:'Prestige', color:'#ffd700', req:1000},
+                {id:'chroma', name:'Predator', color:'chroma', req:2000}
+            ],
+            snake: [
+                {id:'def', name:'Vert', color:'#00ff00', req:0},
+                {id:'cyan', name:'Cyan', color:'#00ffff', req:10},
+                {id:'purp', name:'Plasma', color:'#ba00e5', req:25},
+                {id:'gold', name:'Luxe', color:'#ffd700', req:50},
+                {id:'chroma', name:'Hydra', color:'chroma', req:100}
+            ]
+        };
+
+        let saveData = {
+            scores: { jumper:0, sniper:0, snake:0 },
+            stats: { jumperDeath:0, sniperShots:0, sniperHits:0, snakeMaxLen:0 },
+            skins: { jumper:'def', sniper:'def', snake:'def' }
+        };
+
+        // Load
+        if(localStorage.getItem('gamesia_v14')) {
+            try { 
+                let loaded = JSON.parse(localStorage.getItem('gamesia_v14')); 
+                saveData = { ...saveData, ...loaded };
+                if(!saveData.stats) saveData.stats = { jumperDeath:0, sniperShots:0, sniperHits:0, snakeMaxLen:0 };
+            } catch(e){}
+        }
+        function save() { localStorage.setItem('gamesia_v14', JSON.stringify(saveData)); }
+
+        // --- NAVIGATION SYSTEM ---
+        const screens = {
+            home: document.getElementById('screen-home'),
+            stats: document.getElementById('screen-stats'),
+            shop: document.getElementById('screen-shop'),
+            select: document.getElementById('screen-select'),
+            game: document.getElementById('screen-game')
+        };
+        let currentGameIndex = 0;
+        let activeGameId = null;
+        let returnToGame = false; // Flag pour savoir si on vient du jeu (Pause)
+
+        function showScreen(name) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            if(name !== 'game') stopGame(); 
+            screens[name].classList.remove('hidden');
+        }
+
+        function goHome() { returnToGame=false; showScreen('home'); }
+        function quitGame() { returnToGame=false; showScreen('home'); }
+
+        function openStats() {
+            let acc = 0;
+            if(saveData.stats.sniperShots > 0) acc = Math.round((saveData.stats.sniperHits / saveData.stats.sniperShots)*100);
+            
+            const div = document.getElementById('stats-display');
+            div.innerHTML = `
+                <h3 style="margin:5px 0; border-bottom:1px solid white">JUMPER</h3>
+                <div>Best Score: <span style="color:#0f0">${Math.floor(saveData.scores.jumper)}</span></div>
+                <div>Morts: <span style="color:#f55">${saveData.stats.jumperDeath}</span></div>
+                
+                <h3 style="margin:15px 0 5px 0; border-bottom:1px solid white">SNIPER</h3>
+                <div>Best Score: <span style="color:#f00">${saveData.scores.sniper}</span></div>
+                <div>Précision: <span style="color:#0ff">${acc}%</span></div>
+                
+                <h3 style="margin:15px 0 5px 0; border-bottom:1px solid white">SNAKE</h3>
+                <div>Best Score: <span style="color:#b0e">${saveData.scores.snake}</span></div>
+                <div>Max Longueur: <span style="color:#ff0">${saveData.stats.snakeMaxLen}</span></div>
+            `;
+            showScreen('stats');
+        }
+
+        // Gestion Shop intelligent
+        function openShop() { 
+            returnToGame = false;
+            renderShopTab('jumper'); 
+            showScreen('shop'); 
+        }
+        function openIngameShop() {
+            returnToGame = true; // Marqueur : on reviendra au jeu
+            renderShopTab(activeGameId); // Ouvre direct l'onglet du jeu en cours
+            showScreen('shop');
+        }
+        function handleShopBack() {
+            if(returnToGame && activeGameId) {
+                showScreen('game');
+                // Si on était en pause, on reste en pause. Si Game Over, on reste en Game Over.
+            } else {
+                goHome();
+            }
+        }
+
+        function renderShopTab(gameId) {
+            document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-'+gameId).classList.add('active');
+            const cont = document.getElementById('shop-content');
+            cont.innerHTML = '';
+            
+            SKINS[gameId].forEach(s => {
+                const unlocked = saveData.scores[gameId] >= s.req;
+                const equipped = saveData.skins[gameId] === s.id;
+                const el = document.createElement('div');
+                el.className = `skin-card ${unlocked?'unlocked':''} ${equipped?'selected':''}`;
+                let bgStyle = s.color==='chroma' ? 'background:linear-gradient(90deg,red,blue); animation:spin 2s linear infinite;' : `background:${s.color}`;
+                el.innerHTML = `
+                    <div class="skin-prev" style="${bgStyle}; border-color:${s.border||'white'}"></div>
+                    <div>${s.name}</div>
+                    ${!unlocked ? `<div style="color:#f55; font-size:0.8em">🔒 ${s.req}</div>` : ''}
+                    ${equipped ? `<div style="color:#0f0; font-size:0.8em">EQUIPÉ</div>` : ''}
+                `;
+                if(unlocked) el.onclick = () => { saveData.skins[gameId] = s.id; save(); renderShopTab(gameId); };
+                cont.appendChild(el);
+            });
+        }
+
+        function openLevelSelect() { returnToGame=false; updateCarousel(); showScreen('select'); }
+        function navGame(dir) {
+            currentGameIndex = (currentGameIndex + dir + GAMES.length) % GAMES.length;
+            updateCarousel();
+        }
+        function updateCarousel() {
+            const g = GAMES[currentGameIndex];
+            document.getElementById('lvl-title').innerText = g.title;
+            document.getElementById('lvl-icon').innerText = g.icon;
+            document.getElementById('lvl-desc').innerText = g.desc;
+            document.getElementById('level-card').style.borderColor = g.color;
+        }
+        function launchGame() {
+            activeGameId = GAMES[currentGameIndex].id;
+            showScreen('game');
+            initGame();
+        }
+
+        // --- GAME ENGINE ---
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let gameLoopId;
+        let game = { running: false, paused: false };
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        function stopGame() { if(gameLoopId) cancelAnimationFrame(gameLoopId); game.running = false; }
+        
+        function initGame() {
+            resize();
+            game.running = true;
+            game.paused = false;
+            
+            // Hide Modals & Overlays
+            document.getElementById('modal-go').classList.add('hidden');
+            document.getElementById('modal-pause').classList.add('hidden');
+            document.getElementById('fire-btn-overlay').classList.add('hidden');
+            document.getElementById('dpad-overlay').classList.add('hidden');
+            document.getElementById('btn-pause').classList.remove('hidden');
+
+            const best = saveData.scores[activeGameId];
+            document.getElementById('hud-best').innerText = Math.floor(best);
+
+            // Init specific game
+            if(activeGameId === 'jumper') startJumper();
+            else if(activeGameId === 'sniper') startSniper();
+            else if(activeGameId === 'snake') startSnake();
+
+            gameLoop();
+        }
+
+        function restartGame() { initGame(); }
+
+        function togglePause() {
+            if(!game.running) return;
+            game.paused = !game.paused;
+            if(game.paused) document.getElementById('modal-pause').classList.remove('hidden');
+            else document.getElementById('modal-pause').classList.add('hidden');
+        }
+
+        function gameLoop() {
+            if(!game.running) return;
+            if(!game.paused) {
+                if(activeGameId === 'jumper') updateJumper();
+                else if(activeGameId === 'sniper') updateSniper();
+                else if(activeGameId === 'snake') updateSnake();
+                
+                // HUD
+                document.getElementById('hud-score').innerText = Math.floor(game.score);
+                const best = saveData.scores[activeGameId];
+                let pct = best > 0 ? Math.floor((game.score / best) * 100) : 0;
+                if(pct > 100) pct = 100;
+                document.getElementById('hud-prog').style.width = pct + "%";
+                document.getElementById('hud-pct').innerText = pct + "%";
+            }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function triggerGameOver(finalScore) {
+            game.running = false;
+            finalScore = Math.floor(finalScore);
+            if(finalScore > saveData.scores[activeGameId]) saveData.scores[activeGameId] = finalScore;
+            
+            if(activeGameId === 'jumper') saveData.stats.jumperDeath++;
+            if(activeGameId === 'snake' && game.snake.length > saveData.stats.snakeMaxLen) saveData.stats.snakeMaxLen = game.snake.length;
+            
+            save();
+            document.getElementById('go-score').innerText = finalScore;
+            document.getElementById('modal-go').classList.remove('hidden');
+            document.getElementById('btn-pause').classList.add('hidden');
+        }
+
+        function getSkinColor(gid) {
+            const sid = saveData.skins[gid];
+            const s = SKINS[gid].find(x => x.id === sid);
+            if(s.color === 'chroma') {
+                const t = Date.now() / 1000;
+                return `hsl(${t * 100}, 100%, 50%)`;
+            }
+            return s.color;
+        }
+
+
+        // --- JUMPER (Avec Barre Espace) ---
+        function startJumper() {
+            game.score = 0; game.speed = 6;
+            game.player = { x:50, y:0, w:40, h:40, dy:0, jump:-14, grounded:false };
+            game.player.y = canvas.height - 150;
+            game.obstacles = [];
+            
+            // Controls: Touch & Spacebar
+            const jumpAction = (e) => { 
+                if(game.running && !game.paused && game.player.grounded) game.player.dy = game.player.jump; 
+            };
+            canvas.onpointerdown = (e) => { e.preventDefault(); jumpAction(); };
+            window.onkeydown = (e) => { if(e.code === 'Space') jumpAction(); };
+        }
+
+        function updateJumper() {
+            game.score += 0.1; game.speed += 0.002;
+            let p = game.player;
+            p.dy += 0.8; p.y += p.dy;
+            const floorY = canvas.height - 100;
+            if(p.y + p.h > floorY) { p.y = floorY - p.h; p.dy = 0; p.grounded = true; } else p.grounded = false;
+
+            if(Math.random() < 0.02) {
+                const last = game.obstacles[game.obstacles.length-1];
+                if(!last || canvas.width - last.x > 300) game.obstacles.push({x:canvas.width, w:40, h:40});
+            }
+
+            ctx.fillStyle = "#001133"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "white"; ctx.fillRect(0, floorY, canvas.width, 5);
+
+            ctx.fillStyle = getSkinColor('jumper');
+            ctx.fillRect(p.x, p.y, p.w, p.h);
+            ctx.strokeStyle="white"; ctx.lineWidth=3; ctx.strokeRect(p.x, p.y, p.w, p.h);
+
+            for(let i=0; i<game.obstacles.length; i++) {
+                let o = game.obstacles[i]; o.x -= game.speed;
+                ctx.fillStyle = "red"; ctx.beginPath(); ctx.moveTo(o.x, floorY); ctx.lineTo(o.x+o.w, floorY); ctx.lineTo(o.x+o.w/2, floorY-o.h); ctx.fill();
+                ctx.strokeStyle="white"; ctx.stroke();
+                if(p.x < o.x + o.w - 10 && p.x + p.w > o.x + 10 && p.y + p.h > floorY - o.h + 10) triggerGameOver(game.score);
+            }
+            game.obstacles = game.obstacles.filter(o => o.x > -50);
+        }
+
+        // --- SNIPER (Rebond Réel & Aim Assist) ---
+        function startSniper() {
+            game.score = 0;
+            game.target = { x:100, y:100, r:25, vx:5, vy:5 };
+            game.scope = { x:canvas.width/2, y:canvas.height/2, r:80 };
+            document.getElementById('fire-btn-overlay').classList.remove('hidden');
+            window.onkeydown = null; canvas.onpointerdown = null;
+        }
+        function updateSniper() {
+            ctx.fillStyle = "#110022"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            let t = game.target;
+            t.x += t.vx; t.y += t.vy;
+            
+            // Rebond sur les Bords Réels
+            if(t.x < t.r) { t.x = t.r; t.vx = Math.abs(t.vx); }
+            if(t.x > canvas.width - t.r) { t.x = canvas.width - t.r; t.vx = -Math.abs(t.vx); }
+            if(t.y < t.r) { t.y = t.r; t.vy = Math.abs(t.vy); }
+            if(t.y > canvas.height - t.r) { t.y = canvas.height - t.r; t.vy = -Math.abs(t.vy); }
+
+            ctx.fillStyle = getSkinColor('sniper'); 
+            ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle="white"; ctx.stroke();
+
+            let s = game.scope;
+            ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s.x, s.y-s.r); ctx.lineTo(s.x, s.y+s.r); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s.x-s.r, s.y); ctx.lineTo(s.x+s.r, s.y); ctx.stroke();
+            ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(s.x, s.y, 4, 0, Math.PI*2); ctx.fill();
+        }
+        function inputFire() {
+            if(!game.running || game.paused) return;
+            saveData.stats.sniperShots++;
+            let t = game.target; let s = game.scope;
+            let dist = Math.sqrt((t.x-s.x)**2 + (t.y-s.y)**2);
+            let hitLimit = s.r + t.r; 
+            if(dist < hitLimit) {
+                saveData.stats.sniperHits++;
+                let acc = 1 - (dist / hitLimit);
+                let pts = Math.floor(100 * (acc * acc)); if(pts < 1) pts = 1;
+                game.score += pts;
+                
+                const fb = document.getElementById('sniper-msg');
+                fb.innerText = "+" + pts; fb.style.opacity = 1; 
+                fb.style.color = pts > 80 ? "#0f0" : "orange";
+                setTimeout(() => fb.style.opacity = 0, 500);
+
+                // Aim Assist Respawn: Shoot towards center roughly
+                t.x = Math.random() < 0.5 ? t.r : canvas.width - t.r; 
+                t.y = Math.random() * canvas.height;
+                // Vector to center
+                let dx = (canvas.width/2) - t.x;
+                let dy = (canvas.height/2) - t.y;
+                let len = Math.sqrt(dx*dx + dy*dy);
+                let speed = Math.sqrt(t.vx*t.vx + t.vy*t.vy) * 1.1; // Speed up
+                // Normalized dir + Random deviation
+                t.vx = (dx/len) * speed + (Math.random()-0.5)*2;
+                t.vy = (dy/len) * speed + (Math.random()-0.5)*2;
+
+            } else { triggerGameOver(game.score); }
+        }
+
+        // --- SNAKE ---
+        function startSnake() {
+            game.score = 0;
+            // Zone de jeu (Marge Top pour HUD)
+            let marginTop = 110; 
+            let marginSide = 20;
+            let cellSize = 30;
+            let cols = Math.floor((canvas.width - marginSide*2) / cellSize);
+            let rows = Math.floor((canvas.height - marginTop - 20) / cellSize);
+            
+            game.grid = { x:marginSide, y:marginTop, cell:cellSize, w:cols, h:rows };
+            game.snake = [{x:5,y:5}, {x:5,y:6}];
+            game.dir = {x:0, y:-1}; game.nextDir = {x:0, y:-1};
+            game.food = {x:Math.floor(cols/2), y:Math.floor(rows/2)};
+            game.moveTimer = 0; game.moveInterval = 10;
+
+            document.getElementById('dpad-overlay').classList.remove('hidden');
+            window.onkeydown = (e) => {
+                if(e.key === 'ArrowUp') inputSnake(0,-1);
+                if(e.key === 'ArrowDown') inputSnake(0,1);
+                if(e.key === 'ArrowLeft') inputSnake(-1,0);
+                if(e.key === 'ArrowRight') inputSnake(1,0);
+            };
+        }
+        function inputSnake(x, y) {
+            if(game.dir.x === -x && x !== 0) return;
+            if(game.dir.y === -y && y !== 0) return;
+            game.nextDir = {x:x, y:y};
+        }
+        function updateSnake() {
+            ctx.fillStyle = "#111"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            let g = game.grid;
+            
+            // Cadre
+            ctx.strokeStyle = "#444"; ctx.lineWidth = 2;
+            ctx.strokeRect(g.x, g.y, g.w*g.cell, g.h*g.cell);
+
+            // Grille
+            ctx.strokeStyle = "#222"; ctx.lineWidth = 1;
+            for(let i=0; i<=g.w; i++) { ctx.beginPath(); ctx.moveTo(g.x+i*g.cell, g.y); ctx.lineTo(g.x+i*g.cell, g.y+g.h*g.cell); ctx.stroke(); }
+            for(let i=0; i<=g.h; i++) { ctx.beginPath(); ctx.moveTo(g.x, g.y+i*g.cell); ctx.lineTo(g.x+g.w*g.cell, g.y+i*g.cell); ctx.stroke(); }
+
+            // Pomme
+            let f = game.food;
+            ctx.fillStyle = "#ff3333"; 
+            ctx.beginPath(); ctx.arc(g.x + f.x*g.cell + g.cell/2, g.y + f.y*g.cell + g.cell/2, g.cell/2 - 4, 0, Math.PI*2); ctx.fill();
+
+            // Serpent
+            ctx.fillStyle = getSkinColor('snake');
+            game.snake.forEach(s => { ctx.fillRect(g.x + s.x*g.cell + 1, g.y + s.y*g.cell + 1, g.cell-2, g.cell-2); });
+
+            game.moveTimer++;
+            if(game.moveTimer > game.moveInterval) {
+                game.moveTimer = 0;
+                game.dir = game.nextDir;
+                let head = { x: game.snake[0].x + game.dir.x, y: game.snake[0].y + game.dir.y };
+
+                if(head.x < 0 || head.x >= g.w || head.y < 0 || head.y >= g.h) { triggerGameOver(game.score); return; }
+                if(game.snake.some(s => s.x === head.x && s.y === head.y)) { triggerGameOver(game.score); return; }
+
+                game.snake.unshift(head);
+                if(head.x === game.food.x && head.y === game.food.y) {
+                    game.score++;
+                    if(game.score % 2 === 0 && game.moveInterval > 4) game.moveInterval--;
+                    let valid = false;
+                    while(!valid) {
+                        game.food = { x: Math.floor(Math.random()*g.w), y: Math.floor(Math.random()*g.h) };
+                        valid = !game.snake.some(s => s.x === game.food.x && s.y === game.food.y);
+                    }
+                } else { game.snake.pop(); }
+            }
+        }
+    </script>
+</body>
+</html>
