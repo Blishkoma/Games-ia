@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Games.IA - Final Version</title>
-    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    
+    <title>Games IA - Arcade de Jeux Vidéo Gratuite</title>
+    <meta name="description" content="Découvrez Games IA : 3 jeux d'arcade addictifs (Snake, Sniper, Jumper) créés par Intelligence Artificielle. Battez les records et débloquez des skins !">
+    <meta name="keywords" content="Games IA, jeu gratuit, snake, sniper, jumper, arcade web, blishkoma">
+    <meta name="author" content="Blishkoma">
+    <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Permanent+Marker&family=Russo+One&display=swap" rel="stylesheet">
+    
     <style>
         /* --- CONFIG GLOBALE --- */
         :root {
@@ -53,7 +58,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* --- 2. MENU PRINCIPAL --- */
+        /* --- MENU PRINCIPAL --- */
         .logo-main {
             font-size: 4em; color: var(--gd-yellow);
             -webkit-text-stroke: 3px black; 
@@ -88,7 +93,19 @@
         .icon-face::before { content:''; position:absolute; top:10px; left:5px; width:8px; height:8px; background:black; }
         .icon-face::after { content:''; position:absolute; top:10px; right:5px; width:8px; height:8px; background:black; }
 
-        /* --- 3. FENÊTRES --- */
+        /* BOUTON HELP US (DONATION) */
+        .btn-donate {
+            position: absolute; bottom: 30px; left: 30px;
+            background: linear-gradient(to bottom, #ff55aa, #aa0055);
+            color: white; border: 3px solid white;
+            padding: 10px 20px; border-radius: 20px;
+            font-family: 'Russo One'; text-decoration: none; font-size: 1.2em;
+            box-shadow: 0 5px 0 #660033; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; z-index: 50;
+        }
+        .btn-donate:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- FENÊTRES --- */
         .window-box {
             background: rgba(0, 20, 40, 0.95); border: 4px solid white; border-radius: 15px;
             padding: 20px; width: 90%; max-width: 500px; text-align: center;
@@ -130,10 +147,9 @@
             font-family: 'Russo One'; border: 3px solid white; border-radius: 10px; cursor: pointer; 
         }
 
-        /* --- 4. HUD JEU & PAUSE --- */
+        /* --- HUD JEU --- */
         #game-hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        /* Bouton Pause */
         #btn-pause {
             position: absolute; top: 15px; left: 20px; pointer-events: auto;
             width: 40px; height: 40px; border: 3px solid white; border-radius: 8px;
@@ -143,7 +159,7 @@
         
         .hud-bar { 
             display: flex; justify-content: space-between; align-items:flex-start;
-            padding: 10px 20px; height: 80px; margin-left: 50px; /* Espace pour btn pause */
+            padding: 10px 20px; height: 80px; margin-left: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
         
@@ -184,7 +200,7 @@
         }
         .fire-circle:active { transform: scale(0.95); background: #cc0000; }
 
-        /* Menus En Jeu (Pause & Game Over) */
+        /* Game Over / Pause */
         .game-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #222; border: 5px solid white; border-radius: 20px;
@@ -204,15 +220,18 @@
     <section id="screen-home" class="full-screen">
         <div class="logo-main">GAMES.IA</div>
         <div class="menu-row">
-            <div class="btn-side" onclick="openShop()">
-                <div class="icon-face"></div>
-            </div>
+            <div class="btn-side" onclick="openShop()"><div class="icon-face"></div></div>
             <div class="btn-play-main" onclick="openLevelSelect()"></div>
             <div class="btn-side" style="background: linear-gradient(to bottom, #ffaa00, #aa5500);" onclick="openStats()">
                 <div style="font-size:1em;">🏆</div>
             </div>
         </div>
-        <p style="margin-top:30px; opacity:0.6;">V14 - Final Edition</p>
+        
+        <a href="https://ko-fi.com/gamesia" target="_blank" class="btn-donate">
+            <span>❤️</span> HELP US
+        </a>
+
+        <p style="margin-top:30px; opacity:0.6;">V15.1 - Final</p>
     </section>
 
     <section id="screen-stats" class="full-screen hidden">
@@ -259,24 +278,20 @@
 
         <div id="game-hud">
             <div id="btn-pause" onclick="togglePause()">II</div>
-
             <div class="hud-bar">
                 <div class="score-block">
                     <span id="hud-score" class="score-val">0</span>
                     <span class="score-lbl">SCORE</span>
                 </div>
-                
                 <div class="prog-area">
                     <div class="prog-track"><div class="prog-fill" id="hud-prog"></div></div>
                     <div class="prog-text" id="hud-pct">0%</div>
                 </div>
-
                 <div class="score-block">
                     <span id="hud-best" class="score-val score-best">0</span>
                     <span class="score-lbl">BEST</span>
                 </div>
             </div>
-            
             <div id="sniper-msg" style="position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); font-size:3em; opacity:0; pointer-events:none;">+100</div>
         </div>
 
@@ -296,7 +311,7 @@
             <h2 style="color:var(--gd-yellow); margin-top:0;">PAUSE</h2>
             <button class="btn-modal" style="background:var(--gd-green); color:black;" onclick="togglePause()">REPRENDRE</button>
             <button class="btn-modal" style="background:var(--gd-blue);" onclick="openIngameShop()">CASIER</button>
-            <button class="btn-modal" style="background:#555;" onclick="quitGame()">MENU PRINCIPAL</button>
+            <button class="btn-modal" style="background:#555;" onclick="quitGame()">MENU</button>
         </div>
 
         <div id="modal-go" class="game-modal hidden" style="border-color:var(--gd-red);">
@@ -310,417 +325,158 @@
     </section>
 
     <script>
-        // --- DATA & CONFIG ---
         const GAMES = [
-            { id: 'jumper', title: 'STEREO JUMP', icon: '🔺', desc: 'Saute (Espace/Touch). Triangles mortels.', color: '#00ff00' },
-            { id: 'sniper', title: 'DEADSHOT', icon: '🎯', desc: 'Vise. Précision = Points.', color: '#ff0000' },
-            { id: 'snake', title: 'NEON SNAKE', icon: '🐍', desc: 'Mange. Zone sécurisée.', color: '#ba00e5' }
+            { id: 'jumper', title: 'STEREO JUMP', icon: '🔺', desc: 'Saut (Touch/Espace)', color: '#00ff00' },
+            { id: 'sniper', title: 'DEADSHOT', icon: '🎯', desc: 'Vise le centre !', color: '#ff0000' },
+            { id: 'snake', title: 'NEON SNAKE', icon: '🐍', desc: 'Mange les pommes.', color: '#ba00e5' }
         ];
-
-        // Skins facilités
         const SKINS = {
-            jumper: [
-                {id:'def', name:'Cube', color:'#00ff00', req:0},
-                {id:'gold', name:'Gold', color:'#ffd700', req:500},
-                {id:'fire', name:'Magma', color:'#ff4400', req:1000},
-                {id:'dark', name:'Ninja', color:'#222', border:'white', req:2000},
-                {id:'chroma', name:'Rainbow', color:'chroma', req:3000}
-            ],
-            sniper: [
-                {id:'def', name:'Rouge', color:'#ff0000', req:0},
-                {id:'blue', name:'Marine', color:'#0088ff', req:200},
-                {id:'swat', name:'Tactique', color:'#555', border:'white', req:500},
-                {id:'gold', name:'Prestige', color:'#ffd700', req:1000},
-                {id:'chroma', name:'Predator', color:'chroma', req:2000}
-            ],
-            snake: [
-                {id:'def', name:'Vert', color:'#00ff00', req:0},
-                {id:'cyan', name:'Cyan', color:'#00ffff', req:10},
-                {id:'purp', name:'Plasma', color:'#ba00e5', req:25},
-                {id:'gold', name:'Luxe', color:'#ffd700', req:50},
-                {id:'chroma', name:'Hydra', color:'chroma', req:100}
-            ]
+            jumper: [ {id:'def',name:'Cube',color:'#00ff00',req:0}, {id:'gold',name:'Gold',color:'#ffd700',req:500}, {id:'fire',name:'Magma',color:'#ff4400',req:1000}, {id:'dark',name:'Ninja',color:'#222',border:'white',req:2000}, {id:'chroma',name:'Rainbow',color:'chroma',req:3000} ],
+            sniper: [ {id:'def',name:'Rouge',color:'#ff0000',req:0}, {id:'blue',name:'Marine',color:'#0088ff',req:200}, {id:'swat',name:'Tactique',color:'#555',border:'white',req:500}, {id:'gold',name:'Prestige',color:'#ffd700',req:1000}, {id:'chroma',name:'Predator',color:'chroma',req:2000} ],
+            snake: [ {id:'def',name:'Vert',color:'#00ff00',req:0}, {id:'cyan',name:'Cyan',color:'#00ffff',req:10}, {id:'purp',name:'Plasma',color:'#ba00e5',req:25}, {id:'gold',name:'Luxe',color:'#ffd700',req:50}, {id:'chroma',name:'Hydra',color:'chroma',req:100} ]
         };
-
-        let saveData = {
-            scores: { jumper:0, sniper:0, snake:0 },
-            stats: { jumperDeath:0, sniperShots:0, sniperHits:0, snakeMaxLen:0 },
-            skins: { jumper:'def', sniper:'def', snake:'def' }
-        };
-
-        // Load
-        if(localStorage.getItem('gamesia_v14')) {
-            try { 
-                let loaded = JSON.parse(localStorage.getItem('gamesia_v14')); 
-                saveData = { ...saveData, ...loaded };
-                if(!saveData.stats) saveData.stats = { jumperDeath:0, sniperShots:0, sniperHits:0, snakeMaxLen:0 };
-            } catch(e){}
-        }
-        function save() { localStorage.setItem('gamesia_v14', JSON.stringify(saveData)); }
-
-        // --- NAVIGATION SYSTEM ---
-        const screens = {
-            home: document.getElementById('screen-home'),
-            stats: document.getElementById('screen-stats'),
-            shop: document.getElementById('screen-shop'),
-            select: document.getElementById('screen-select'),
-            game: document.getElementById('screen-game')
-        };
-        let currentGameIndex = 0;
-        let activeGameId = null;
-        let returnToGame = false; // Flag pour savoir si on vient du jeu (Pause)
-
-        function showScreen(name) {
-            Object.values(screens).forEach(s => s.classList.add('hidden'));
-            if(name !== 'game') stopGame(); 
-            screens[name].classList.remove('hidden');
-        }
-
-        function goHome() { returnToGame=false; showScreen('home'); }
-        function quitGame() { returnToGame=false; showScreen('home'); }
-
-        function openStats() {
-            let acc = 0;
-            if(saveData.stats.sniperShots > 0) acc = Math.round((saveData.stats.sniperHits / saveData.stats.sniperShots)*100);
-            
-            const div = document.getElementById('stats-display');
-            div.innerHTML = `
-                <h3 style="margin:5px 0; border-bottom:1px solid white">JUMPER</h3>
-                <div>Best Score: <span style="color:#0f0">${Math.floor(saveData.scores.jumper)}</span></div>
-                <div>Morts: <span style="color:#f55">${saveData.stats.jumperDeath}</span></div>
-                
-                <h3 style="margin:15px 0 5px 0; border-bottom:1px solid white">SNIPER</h3>
-                <div>Best Score: <span style="color:#f00">${saveData.scores.sniper}</span></div>
-                <div>Précision: <span style="color:#0ff">${acc}%</span></div>
-                
-                <h3 style="margin:15px 0 5px 0; border-bottom:1px solid white">SNAKE</h3>
-                <div>Best Score: <span style="color:#b0e">${saveData.scores.snake}</span></div>
-                <div>Max Longueur: <span style="color:#ff0">${saveData.stats.snakeMaxLen}</span></div>
-            `;
+        let saveData = { scores:{jumper:0,sniper:0,snake:0}, stats:{jumperDeath:0,sniperShots:0,sniperHits:0,snakeMaxLen:0}, skins:{jumper:'def',sniper:'def',snake:'def'} };
+        if(localStorage.getItem('gamesia_v15')) try{saveData={...saveData,...JSON.parse(localStorage.getItem('gamesia_v15'))}}catch(e){}
+        function save(){localStorage.setItem('gamesia_v15',JSON.stringify(saveData))}
+        
+        const screens={home:document.getElementById('screen-home'),stats:document.getElementById('screen-stats'),shop:document.getElementById('screen-shop'),select:document.getElementById('screen-select'),game:document.getElementById('screen-game')};
+        let currentGameIndex=0, activeGameId=null, returnToGame=false;
+        function showScreen(n){Object.values(screens).forEach(s=>s.classList.add('hidden'));if(n!=='game')stopGame();screens[n].classList.remove('hidden')}
+        function goHome(){returnToGame=false;showScreen('home')}
+        function quitGame(){returnToGame=false;showScreen('home')}
+        function openStats(){
+            let acc=saveData.stats.sniperShots>0?Math.round((saveData.stats.sniperHits/saveData.stats.sniperShots)*100):0;
+            document.getElementById('stats-display').innerHTML=`<h3>JUMPER</h3><div>Best: <span style="color:#0f0">${Math.floor(saveData.scores.jumper)}</span></div><div>Morts: <span style="color:#f55">${saveData.stats.jumperDeath}</span></div><h3>SNIPER</h3><div>Best: <span style="color:#f00">${saveData.scores.sniper}</span></div><div>Précision: <span style="color:#0ff">${acc}%</span></div><h3>SNAKE</h3><div>Best: <span style="color:#b0e">${saveData.scores.snake}</span></div><div>Max Longueur: <span style="color:#ff0">${saveData.stats.snakeMaxLen}</span></div>`;
             showScreen('stats');
         }
-
-        // Gestion Shop intelligent
-        function openShop() { 
-            returnToGame = false;
-            renderShopTab('jumper'); 
-            showScreen('shop'); 
-        }
-        function openIngameShop() {
-            returnToGame = true; // Marqueur : on reviendra au jeu
-            renderShopTab(activeGameId); // Ouvre direct l'onglet du jeu en cours
-            showScreen('shop');
-        }
-        function handleShopBack() {
-            if(returnToGame && activeGameId) {
-                showScreen('game');
-                // Si on était en pause, on reste en pause. Si Game Over, on reste en Game Over.
-            } else {
-                goHome();
-            }
-        }
-
-        function renderShopTab(gameId) {
-            document.querySelectorAll('.shop-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-'+gameId).classList.add('active');
-            const cont = document.getElementById('shop-content');
-            cont.innerHTML = '';
-            
-            SKINS[gameId].forEach(s => {
-                const unlocked = saveData.scores[gameId] >= s.req;
-                const equipped = saveData.skins[gameId] === s.id;
-                const el = document.createElement('div');
-                el.className = `skin-card ${unlocked?'unlocked':''} ${equipped?'selected':''}`;
-                let bgStyle = s.color==='chroma' ? 'background:linear-gradient(90deg,red,blue); animation:spin 2s linear infinite;' : `background:${s.color}`;
-                el.innerHTML = `
-                    <div class="skin-prev" style="${bgStyle}; border-color:${s.border||'white'}"></div>
-                    <div>${s.name}</div>
-                    ${!unlocked ? `<div style="color:#f55; font-size:0.8em">🔒 ${s.req}</div>` : ''}
-                    ${equipped ? `<div style="color:#0f0; font-size:0.8em">EQUIPÉ</div>` : ''}
-                `;
-                if(unlocked) el.onclick = () => { saveData.skins[gameId] = s.id; save(); renderShopTab(gameId); };
-                cont.appendChild(el);
+        function openShop(){returnToGame=false;renderShopTab('jumper');showScreen('shop')}
+        function openIngameShop(){returnToGame=true;renderShopTab(activeGameId);showScreen('shop')}
+        function handleShopBack(){returnToGame&&activeGameId?showScreen('game'):goHome()}
+        function renderShopTab(gid){
+            document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+gid).classList.add('active');
+            const c=document.getElementById('shop-content');c.innerHTML='';
+            SKINS[gid].forEach(s=>{
+                const u=saveData.scores[gid]>=s.req, e=saveData.skins[gid]===s.id;
+                const d=document.createElement('div');d.className=`skin-card ${u?'unlocked':''} ${e?'selected':''}`;
+                let bg=s.color==='chroma'?'background:linear-gradient(90deg,red,blue);animation:spin 2s linear infinite;':`background:${s.color}`;
+                d.innerHTML=`<div class="skin-prev" style="${bg};border-color:${s.border||'white'}"></div><div>${s.name}</div>${!u?`<div style="color:#f55;font-size:0.8em">🔒 ${s.req}</div>`:''}${e?`<div style="color:#0f0;font-size:0.8em">EQUIPÉ</div>`:''}`;
+                if(u)d.onclick=()=>{saveData.skins[gid]=s.id;save();renderShopTab(gid)};c.appendChild(d);
             });
         }
-
-        function openLevelSelect() { returnToGame=false; updateCarousel(); showScreen('select'); }
-        function navGame(dir) {
-            currentGameIndex = (currentGameIndex + dir + GAMES.length) % GAMES.length;
-            updateCarousel();
-        }
-        function updateCarousel() {
-            const g = GAMES[currentGameIndex];
-            document.getElementById('lvl-title').innerText = g.title;
-            document.getElementById('lvl-icon').innerText = g.icon;
-            document.getElementById('lvl-desc').innerText = g.desc;
-            document.getElementById('level-card').style.borderColor = g.color;
-        }
-        function launchGame() {
-            activeGameId = GAMES[currentGameIndex].id;
-            showScreen('game');
-            initGame();
-        }
-
-        // --- GAME ENGINE ---
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        let gameLoopId;
-        let game = { running: false, paused: false };
-
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        function stopGame() { if(gameLoopId) cancelAnimationFrame(gameLoopId); game.running = false; }
+        function openLevelSelect(){returnToGame=false;updateCarousel();showScreen('select')}
+        function navGame(d){currentGameIndex=(currentGameIndex+d+GAMES.length)%GAMES.length;updateCarousel()}
+        function updateCarousel(){const g=GAMES[currentGameIndex];document.getElementById('lvl-title').innerText=g.title;document.getElementById('lvl-icon').innerText=g.icon;document.getElementById('lvl-desc').innerText=g.desc;document.getElementById('level-card').style.borderColor=g.color}
+        function launchGame(){activeGameId=GAMES[currentGameIndex].id;showScreen('game');initGame()}
         
-        function initGame() {
-            resize();
-            game.running = true;
-            game.paused = false;
-            
-            // Hide Modals & Overlays
-            document.getElementById('modal-go').classList.add('hidden');
-            document.getElementById('modal-pause').classList.add('hidden');
-            document.getElementById('fire-btn-overlay').classList.add('hidden');
-            document.getElementById('dpad-overlay').classList.add('hidden');
+        const canvas=document.getElementById('game-canvas'), ctx=canvas.getContext('2d');
+        let gameLoopId, game={running:false,paused:false};
+        function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+        window.addEventListener('resize',resize);
+        function stopGame(){if(gameLoopId)cancelAnimationFrame(gameLoopId);game.running=false}
+        function initGame(){
+            resize();game.running=true;game.paused=false;
+            document.getElementById('modal-go').classList.add('hidden');document.getElementById('modal-pause').classList.add('hidden');
+            document.getElementById('fire-btn-overlay').classList.add('hidden');document.getElementById('dpad-overlay').classList.add('hidden');
             document.getElementById('btn-pause').classList.remove('hidden');
-
-            const best = saveData.scores[activeGameId];
-            document.getElementById('hud-best').innerText = Math.floor(best);
-
-            // Init specific game
-            if(activeGameId === 'jumper') startJumper();
-            else if(activeGameId === 'sniper') startSniper();
-            else if(activeGameId === 'snake') startSnake();
-
+            document.getElementById('hud-best').innerText=Math.floor(saveData.scores[activeGameId]);
+            if(activeGameId==='jumper')startJumper();else if(activeGameId==='sniper')startSniper();else startSnake();
             gameLoop();
         }
-
-        function restartGame() { initGame(); }
-
-        function togglePause() {
-            if(!game.running) return;
-            game.paused = !game.paused;
-            if(game.paused) document.getElementById('modal-pause').classList.remove('hidden');
-            else document.getElementById('modal-pause').classList.add('hidden');
-        }
-
-        function gameLoop() {
-            if(!game.running) return;
-            if(!game.paused) {
-                if(activeGameId === 'jumper') updateJumper();
-                else if(activeGameId === 'sniper') updateSniper();
-                else if(activeGameId === 'snake') updateSnake();
-                
-                // HUD
-                document.getElementById('hud-score').innerText = Math.floor(game.score);
-                const best = saveData.scores[activeGameId];
-                let pct = best > 0 ? Math.floor((game.score / best) * 100) : 0;
-                if(pct > 100) pct = 100;
-                document.getElementById('hud-prog').style.width = pct + "%";
-                document.getElementById('hud-pct').innerText = pct + "%";
+        function restartGame(){initGame()}
+        function togglePause(){if(!game.running)return;game.paused=!game.paused;document.getElementById('modal-pause').classList.toggle('hidden',!game.paused)}
+        function gameLoop(){
+            if(!game.running)return;
+            if(!game.paused){
+                if(activeGameId==='jumper')updateJumper();else if(activeGameId==='sniper')updateSniper();else updateSnake();
+                document.getElementById('hud-score').innerText=Math.floor(game.score);
+                const b=saveData.scores[activeGameId], p=b>0?Math.floor((game.score/b)*100):0;
+                document.getElementById('hud-prog').style.width=Math.min(p,100)+'%';document.getElementById('hud-pct').innerText=Math.min(p,100)+'%';
             }
-            gameLoopId = requestAnimationFrame(gameLoop);
+            gameLoopId=requestAnimationFrame(gameLoop);
+        }
+        function triggerGameOver(sc){
+            game.running=false;sc=Math.floor(sc);
+            if(sc>saveData.scores[activeGameId])saveData.scores[activeGameId]=sc;
+            if(activeGameId==='jumper')saveData.stats.jumperDeath++;
+            if(activeGameId==='snake'&&game.snake.length>saveData.stats.snakeMaxLen)saveData.stats.snakeMaxLen=game.snake.length;
+            save();document.getElementById('go-score').innerText=sc;
+            document.getElementById('modal-go').classList.remove('hidden');document.getElementById('btn-pause').classList.add('hidden');
+        }
+        function getSkinColor(g){
+            const s=SKINS[g].find(x=>x.id===saveData.skins[g]);
+            return s.color==='chroma'?`hsl(${Date.now()/10%360},100%,50%)`:s.color;
         }
 
-        function triggerGameOver(finalScore) {
-            game.running = false;
-            finalScore = Math.floor(finalScore);
-            if(finalScore > saveData.scores[activeGameId]) saveData.scores[activeGameId] = finalScore;
-            
-            if(activeGameId === 'jumper') saveData.stats.jumperDeath++;
-            if(activeGameId === 'snake' && game.snake.length > saveData.stats.snakeMaxLen) saveData.stats.snakeMaxLen = game.snake.length;
-            
-            save();
-            document.getElementById('go-score').innerText = finalScore;
-            document.getElementById('modal-go').classList.remove('hidden');
-            document.getElementById('btn-pause').classList.add('hidden');
+        // JUMPER
+        function startJumper(){game.score=0;game.speed=6;game.p={x:50,y:0,w:40,h:40,dy:0,ground:false};game.obs=[];
+            const jump=()=>{if(game.running&&!game.paused&&game.p.ground)game.p.dy=-14};
+            canvas.onpointerdown=(e)=>{e.preventDefault();jump()};window.onkeydown=(e)=>{if(e.code==='Space')jump()};
         }
-
-        function getSkinColor(gid) {
-            const sid = saveData.skins[gid];
-            const s = SKINS[gid].find(x => x.id === sid);
-            if(s.color === 'chroma') {
-                const t = Date.now() / 1000;
-                return `hsl(${t * 100}, 100%, 50%)`;
+        function updateJumper(){
+            game.score+=0.1;game.speed+=0.002;
+            let p=game.p;p.dy+=0.8;p.y+=p.dy;const fy=canvas.height-100;
+            if(p.y+p.h>fy){p.y=fy-p.h;p.dy=0;p.ground=true}else p.ground=false;
+            if(Math.random()<0.02){const l=game.obs[game.obs.length-1];if(!l||canvas.width-l.x>300)game.obs.push({x:canvas.width,w:40,h:40})}
+            ctx.fillStyle="#001133";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="white";ctx.fillRect(0,fy,canvas.width,5);
+            ctx.fillStyle=getSkinColor('jumper');ctx.fillRect(p.x,p.y,p.w,p.h);ctx.strokeStyle="white";ctx.lineWidth=3;ctx.strokeRect(p.x,p.y,p.w,p.h);
+            for(let i=0;i<game.obs.length;i++){
+                let o=game.obs[i];o.x-=game.speed;
+                ctx.fillStyle="red";ctx.beginPath();ctx.moveTo(o.x,fy);ctx.lineTo(o.x+o.w,fy);ctx.lineTo(o.x+o.w/2,fy-o.h);ctx.fill();
+                ctx.strokeStyle="white";ctx.stroke();
+                if(p.x<o.x+o.w-10&&p.x+p.w>o.x+10&&p.y+p.h>fy-o.h+10)triggerGameOver(game.score);
             }
-            return s.color;
+            game.obs=game.obs.filter(o=>o.x>-50);
         }
 
-
-        // --- JUMPER (Avec Barre Espace) ---
-        function startJumper() {
-            game.score = 0; game.speed = 6;
-            game.player = { x:50, y:0, w:40, h:40, dy:0, jump:-14, grounded:false };
-            game.player.y = canvas.height - 150;
-            game.obstacles = [];
-            
-            // Controls: Touch & Spacebar
-            const jumpAction = (e) => { 
-                if(game.running && !game.paused && game.player.grounded) game.player.dy = game.player.jump; 
-            };
-            canvas.onpointerdown = (e) => { e.preventDefault(); jumpAction(); };
-            window.onkeydown = (e) => { if(e.code === 'Space') jumpAction(); };
+        // SNIPER
+        function startSniper(){game.score=0;game.t={x:100,y:100,r:25,vx:5,vy:5};game.s={x:canvas.width/2,y:canvas.height/2,r:80};
+            document.getElementById('fire-btn-overlay').classList.remove('hidden');window.onkeydown=null;canvas.onpointerdown=null;}
+        function updateSniper(){
+            ctx.fillStyle="#110022";ctx.fillRect(0,0,canvas.width,canvas.height);
+            let t=game.t;t.x+=t.vx;t.y+=t.vy;
+            if(t.x<t.r){t.x=t.r;t.vx=Math.abs(t.vx)}if(t.x>canvas.width-t.r){t.x=canvas.width-t.r;t.vx=-Math.abs(t.vx)}
+            if(t.y<t.r){t.y=t.r;t.vy=Math.abs(t.vy)}if(t.y>canvas.height-t.r){t.y=canvas.height-t.r;t.vy=-Math.abs(t.vy)}
+            ctx.fillStyle=getSkinColor('sniper');ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="white";ctx.stroke();
+            let s=game.s;ctx.strokeStyle="rgba(255,255,255,0.8)";ctx.lineWidth=4;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.stroke();
+            ctx.beginPath();ctx.moveTo(s.x,s.y-s.r);ctx.lineTo(s.x,s.y+s.r);ctx.stroke();ctx.beginPath();ctx.moveTo(s.x-s.r,s.y);ctx.lineTo(s.x+s.r,s.y);ctx.stroke();
+            ctx.fillStyle="red";ctx.beginPath();ctx.arc(s.x,s.y,4,0,Math.PI*2);ctx.fill();
+        }
+        function inputFire(){
+            if(!game.running||game.paused)return;saveData.stats.sniperShots++;
+            let t=game.t,s=game.s,d=Math.sqrt((t.x-s.x)**2+(t.y-s.y)**2),l=s.r+t.r;
+            if(d<l){
+                saveData.stats.sniperHits++;let p=Math.floor(100*((1-d/l)**2));if(p<1)p=1;game.score+=p;
+                const m=document.getElementById('sniper-msg');m.innerText="+"+p;m.style.opacity=1;setTimeout(()=>m.style.opacity=0,500);
+                t.x=Math.random()*canvas.width;t.y=Math.random()*canvas.height;
+                let dx=canvas.width/2-t.x,dy=canvas.height/2-t.y,len=Math.sqrt(dx*dx+dy*dy),sp=Math.sqrt(t.vx**2+t.vy**2)*1.1;
+                t.vx=(dx/len)*sp+(Math.random()-0.5)*2;t.vy=(dy/len)*sp+(Math.random()-0.5)*2;
+            }else triggerGameOver(game.score);
         }
 
-        function updateJumper() {
-            game.score += 0.1; game.speed += 0.002;
-            let p = game.player;
-            p.dy += 0.8; p.y += p.dy;
-            const floorY = canvas.height - 100;
-            if(p.y + p.h > floorY) { p.y = floorY - p.h; p.dy = 0; p.grounded = true; } else p.grounded = false;
-
-            if(Math.random() < 0.02) {
-                const last = game.obstacles[game.obstacles.length-1];
-                if(!last || canvas.width - last.x > 300) game.obstacles.push({x:canvas.width, w:40, h:40});
-            }
-
-            ctx.fillStyle = "#001133"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "white"; ctx.fillRect(0, floorY, canvas.width, 5);
-
-            ctx.fillStyle = getSkinColor('jumper');
-            ctx.fillRect(p.x, p.y, p.w, p.h);
-            ctx.strokeStyle="white"; ctx.lineWidth=3; ctx.strokeRect(p.x, p.y, p.w, p.h);
-
-            for(let i=0; i<game.obstacles.length; i++) {
-                let o = game.obstacles[i]; o.x -= game.speed;
-                ctx.fillStyle = "red"; ctx.beginPath(); ctx.moveTo(o.x, floorY); ctx.lineTo(o.x+o.w, floorY); ctx.lineTo(o.x+o.w/2, floorY-o.h); ctx.fill();
-                ctx.strokeStyle="white"; ctx.stroke();
-                if(p.x < o.x + o.w - 10 && p.x + p.w > o.x + 10 && p.y + p.h > floorY - o.h + 10) triggerGameOver(game.score);
-            }
-            game.obstacles = game.obstacles.filter(o => o.x > -50);
+        // SNAKE
+        function startSnake(){
+            game.score=0;let mt=110,mx=20,cs=30,cols=Math.floor((canvas.width-mx*2)/cs),rows=Math.floor((canvas.height-mt-20)/cs);
+            game.g={x:mx,y:mt,c:cs,w:cols,h:rows};game.snake=[{x:5,y:5},{x:5,y:6}];game.d={x:0,y:-1};game.nd={x:0,y:-1};game.f={x:Math.floor(cols/2),y:Math.floor(rows/2)};
+            game.tm=0;game.sp=10;document.getElementById('dpad-overlay').classList.remove('hidden');
+            window.onkeydown=(e)=>{if(e.key==='ArrowUp')inputSnake(0,-1);if(e.key==='ArrowDown')inputSnake(0,1);if(e.key==='ArrowLeft')inputSnake(-1,0);if(e.key==='ArrowRight')inputSnake(1,0)};
         }
-
-        // --- SNIPER (Rebond Réel & Aim Assist) ---
-        function startSniper() {
-            game.score = 0;
-            game.target = { x:100, y:100, r:25, vx:5, vy:5 };
-            game.scope = { x:canvas.width/2, y:canvas.height/2, r:80 };
-            document.getElementById('fire-btn-overlay').classList.remove('hidden');
-            window.onkeydown = null; canvas.onpointerdown = null;
-        }
-        function updateSniper() {
-            ctx.fillStyle = "#110022"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            let t = game.target;
-            t.x += t.vx; t.y += t.vy;
-            
-            // Rebond sur les Bords Réels
-            if(t.x < t.r) { t.x = t.r; t.vx = Math.abs(t.vx); }
-            if(t.x > canvas.width - t.r) { t.x = canvas.width - t.r; t.vx = -Math.abs(t.vx); }
-            if(t.y < t.r) { t.y = t.r; t.vy = Math.abs(t.vy); }
-            if(t.y > canvas.height - t.r) { t.y = canvas.height - t.r; t.vy = -Math.abs(t.vy); }
-
-            ctx.fillStyle = getSkinColor('sniper'); 
-            ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle="white"; ctx.stroke();
-
-            let s = game.scope;
-            ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(s.x, s.y-s.r); ctx.lineTo(s.x, s.y+s.r); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(s.x-s.r, s.y); ctx.lineTo(s.x+s.r, s.y); ctx.stroke();
-            ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(s.x, s.y, 4, 0, Math.PI*2); ctx.fill();
-        }
-        function inputFire() {
-            if(!game.running || game.paused) return;
-            saveData.stats.sniperShots++;
-            let t = game.target; let s = game.scope;
-            let dist = Math.sqrt((t.x-s.x)**2 + (t.y-s.y)**2);
-            let hitLimit = s.r + t.r; 
-            if(dist < hitLimit) {
-                saveData.stats.sniperHits++;
-                let acc = 1 - (dist / hitLimit);
-                let pts = Math.floor(100 * (acc * acc)); if(pts < 1) pts = 1;
-                game.score += pts;
-                
-                const fb = document.getElementById('sniper-msg');
-                fb.innerText = "+" + pts; fb.style.opacity = 1; 
-                fb.style.color = pts > 80 ? "#0f0" : "orange";
-                setTimeout(() => fb.style.opacity = 0, 500);
-
-                // Aim Assist Respawn: Shoot towards center roughly
-                t.x = Math.random() < 0.5 ? t.r : canvas.width - t.r; 
-                t.y = Math.random() * canvas.height;
-                // Vector to center
-                let dx = (canvas.width/2) - t.x;
-                let dy = (canvas.height/2) - t.y;
-                let len = Math.sqrt(dx*dx + dy*dy);
-                let speed = Math.sqrt(t.vx*t.vx + t.vy*t.vy) * 1.1; // Speed up
-                // Normalized dir + Random deviation
-                t.vx = (dx/len) * speed + (Math.random()-0.5)*2;
-                t.vy = (dy/len) * speed + (Math.random()-0.5)*2;
-
-            } else { triggerGameOver(game.score); }
-        }
-
-        // --- SNAKE ---
-        function startSnake() {
-            game.score = 0;
-            // Zone de jeu (Marge Top pour HUD)
-            let marginTop = 110; 
-            let marginSide = 20;
-            let cellSize = 30;
-            let cols = Math.floor((canvas.width - marginSide*2) / cellSize);
-            let rows = Math.floor((canvas.height - marginTop - 20) / cellSize);
-            
-            game.grid = { x:marginSide, y:marginTop, cell:cellSize, w:cols, h:rows };
-            game.snake = [{x:5,y:5}, {x:5,y:6}];
-            game.dir = {x:0, y:-1}; game.nextDir = {x:0, y:-1};
-            game.food = {x:Math.floor(cols/2), y:Math.floor(rows/2)};
-            game.moveTimer = 0; game.moveInterval = 10;
-
-            document.getElementById('dpad-overlay').classList.remove('hidden');
-            window.onkeydown = (e) => {
-                if(e.key === 'ArrowUp') inputSnake(0,-1);
-                if(e.key === 'ArrowDown') inputSnake(0,1);
-                if(e.key === 'ArrowLeft') inputSnake(-1,0);
-                if(e.key === 'ArrowRight') inputSnake(1,0);
-            };
-        }
-        function inputSnake(x, y) {
-            if(game.dir.x === -x && x !== 0) return;
-            if(game.dir.y === -y && y !== 0) return;
-            game.nextDir = {x:x, y:y};
-        }
-        function updateSnake() {
-            ctx.fillStyle = "#111"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            let g = game.grid;
-            
-            // Cadre
-            ctx.strokeStyle = "#444"; ctx.lineWidth = 2;
-            ctx.strokeRect(g.x, g.y, g.w*g.cell, g.h*g.cell);
-
-            // Grille
-            ctx.strokeStyle = "#222"; ctx.lineWidth = 1;
-            for(let i=0; i<=g.w; i++) { ctx.beginPath(); ctx.moveTo(g.x+i*g.cell, g.y); ctx.lineTo(g.x+i*g.cell, g.y+g.h*g.cell); ctx.stroke(); }
-            for(let i=0; i<=g.h; i++) { ctx.beginPath(); ctx.moveTo(g.x, g.y+i*g.cell); ctx.lineTo(g.x+g.w*g.cell, g.y+i*g.cell); ctx.stroke(); }
-
-            // Pomme
-            let f = game.food;
-            ctx.fillStyle = "#ff3333"; 
-            ctx.beginPath(); ctx.arc(g.x + f.x*g.cell + g.cell/2, g.y + f.y*g.cell + g.cell/2, g.cell/2 - 4, 0, Math.PI*2); ctx.fill();
-
-            // Serpent
-            ctx.fillStyle = getSkinColor('snake');
-            game.snake.forEach(s => { ctx.fillRect(g.x + s.x*g.cell + 1, g.y + s.y*g.cell + 1, g.cell-2, g.cell-2); });
-
-            game.moveTimer++;
-            if(game.moveTimer > game.moveInterval) {
-                game.moveTimer = 0;
-                game.dir = game.nextDir;
-                let head = { x: game.snake[0].x + game.dir.x, y: game.snake[0].y + game.dir.y };
-
-                if(head.x < 0 || head.x >= g.w || head.y < 0 || head.y >= g.h) { triggerGameOver(game.score); return; }
-                if(game.snake.some(s => s.x === head.x && s.y === head.y)) { triggerGameOver(game.score); return; }
-
-                game.snake.unshift(head);
-                if(head.x === game.food.x && head.y === game.food.y) {
-                    game.score++;
-                    if(game.score % 2 === 0 && game.moveInterval > 4) game.moveInterval--;
-                    let valid = false;
-                    while(!valid) {
-                        game.food = { x: Math.floor(Math.random()*g.w), y: Math.floor(Math.random()*g.h) };
-                        valid = !game.snake.some(s => s.x === game.food.x && s.y === game.food.y);
-                    }
-                } else { game.snake.pop(); }
+        function inputSnake(x,y){if(game.d.x===-x&&x!==0)return;if(game.d.y===-y&&y!==0)return;game.nd={x:x,y:y}}
+        function updateSnake(){
+            ctx.fillStyle="#111";ctx.fillRect(0,0,canvas.width,canvas.height);let g=game.g;
+            ctx.strokeStyle="#444";ctx.lineWidth=2;ctx.strokeRect(g.x,g.y,g.w*g.c,g.h*g.c);
+            ctx.strokeStyle="#222";ctx.lineWidth=1;
+            for(let i=0;i<=g.w;i++){ctx.beginPath();ctx.moveTo(g.x+i*g.c,g.y);ctx.lineTo(g.x+i*g.c,g.y+g.h*g.c);ctx.stroke()}
+            for(let i=0;i<=g.h;i++){ctx.beginPath();ctx.moveTo(g.x,g.y+i*g.c);ctx.lineTo(g.x+g.w*g.c,g.y+i*g.c);ctx.stroke()}
+            let f=game.f;ctx.fillStyle="#f33";ctx.beginPath();ctx.arc(g.x+f.x*g.c+g.c/2,g.y+f.y*g.c+g.c/2,g.c/2-4,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=getSkinColor('snake');game.snake.forEach(s=>{ctx.fillRect(g.x+s.x*g.c+1,g.y+s.y*g.c+1,g.c-2,g.c-2)});
+            game.tm++;if(game.tm>game.sp){
+                game.tm=0;game.d=game.nd;let h={x:game.snake[0].x+game.d.x,y:game.snake[0].y+game.d.y};
+                if(h.x<0||h.x>=g.w||h.y<0||h.y>=g.h||game.snake.some(s=>s.x===h.x&&s.y===h.y)){triggerGameOver(game.score);return}
+                game.snake.unshift(h);
+                if(h.x===game.f.x&&h.y===game.f.y){
+                    game.score++;if(game.score%2===0&&game.sp>4)game.sp--;
+                    let v=false;while(!v){game.f={x:Math.floor(Math.random()*g.w),y:Math.floor(Math.random()*g.h)};v=!game.snake.some(s=>s.x===game.f.x&&s.y===game.f.y)}
+                }else game.snake.pop();
             }
         }
     </script>
